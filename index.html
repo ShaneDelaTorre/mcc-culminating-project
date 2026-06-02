@@ -1,460 +1,599 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Tech Meets Culture Blueprint — OpsWerks 2026</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Tech Meets Culture Blueprint — OpsWerks 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --dark:#0D3D2E;--mid:#1A6B4A;--bright:#009368;
+  --lime:#BAD539;--lime-light:#d9eca0;
+  --offwhite:#F4FBF0;--text:#0d2018;
+  --sans:'Plus Jakarta Sans',sans-serif;
+  --serif:'Fraunces',serif;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;font-family:var(--sans);}
 
-    :root {
-      --ops-dark: #0D3D2E;
-      --ops-mid: #1A6B4A;
-      --ops-bright: #009368;
-      --ops-lime: #BAD539;
-      --ops-lime-light: #d9eca0;
-      --ops-offwhite: #F4FBF0;
-      --ops-text-dark: #0d2018;
-    }
+/* ── PAGES CONTAINER ── */
+#pages{position:fixed;inset:0;display:flex;flex-direction:column;}
 
-    html, body {
-      height: 100%;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: #0a0a0a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px 16px;
-      min-height: 100vh;
-    }
+.page{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;
+  transition:opacity .5s ease, transform .5s ease;
+  transform:translateY(30px);
+  overflow:hidden;
+}
+.page.active{
+  opacity:1;pointer-events:all;
+  transform:translateY(0);
+  transition:opacity .6s ease, transform .6s ease;
+}
+.page.exit-up{
+  opacity:0;transform:translateY(-30px);
+  transition:opacity .4s ease, transform .4s ease;
+  pointer-events:none;
+}
 
-    /* ── Shell ── */
-    #app {
-      width: 100%;
-      max-width: 860px;
-      min-height: 600px;
-      background: var(--ops-offwhite);
-      border-radius: 24px;
-      border: 2px solid var(--ops-dark);
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
+/* ── GLOBAL NAV ── */
+#global-nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 32px;
+  background:linear-gradient(to bottom,rgba(0,0,0,0.55) 0%,transparent 100%);
+  pointer-events:none;
+}
+#nav-logo svg{width:110px;height:auto;display:block;}
+#nav-right{display:flex;align-items:center;gap:16px;pointer-events:all;}
+#nav-chapter{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,0.5);font-weight:600;
+  transition:color .3s;
+}
+#menu-btn{
+  background:none;border:1.5px solid rgba(255,255,255,0.35);
+  color:#fff;width:38px;height:38px;border-radius:50%;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:16px;transition:background .2s,border-color .2s;
+}
+#menu-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.8);}
 
-    /* ── Progress bar ── */
-    #progress-bar {
-      height: 3px;
-      background: var(--ops-lime);
-      transition: width 0.35s ease;
-      position: absolute;
-      top: 0; left: 0;
-      z-index: 20;
-    }
+/* ── PROGRESS BAR ── */
+#progress{
+  position:fixed;top:0;left:0;height:3px;
+  background:var(--lime);z-index:200;
+  transition:width .5s ease;
+}
 
-    /* ── Slides ── */
-    .slide {
-      display: none;
-      flex: 1;
-      animation: fadeIn 0.35s ease;
-    }
-    .slide.active { display: flex; }
+/* ── BOTTOM NAV ── */
+#bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 32px;
+  background:linear-gradient(to top,rgba(0,0,0,0.6) 0%,transparent 100%);
+}
+.nav-btn{
+  background:none;border:1.5px solid rgba(255,255,255,0.4);
+  color:#fff;font-family:var(--sans);font-size:12px;font-weight:600;
+  padding:8px 22px;border-radius:40px;cursor:pointer;
+  letter-spacing:.04em;transition:background .2s,border-color .2s,transform .15s;
+  display:flex;align-items:center;gap:8px;
+  user-select:none;
+}
+.nav-btn:hover:not(:disabled){background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.9);transform:translateY(-1px);}
+.nav-btn:disabled{opacity:.2;cursor:default;}
+.nav-btn:active:not(:disabled){transform:translateY(0);}
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateX(20px); }
-      to   { opacity: 1; transform: translateX(0); }
-    }
+#dots{display:flex;gap:8px;align-items:center;}
+.dot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,.25);border:none;cursor:pointer;
+  transition:background .25s,transform .25s,width .25s;
+}
+.dot.active{background:var(--lime);transform:scale(1.4);}
+.dot:hover:not(.active){background:rgba(255,255,255,.55);}
 
-    /* ── Nav ── */
-    #nav {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 24px;
-      background: var(--ops-dark);
-      z-index: 10;
-    }
+/* ══════════════════════════════════
+   PAGE 0 — COVER
+══════════════════════════════════ */
+#p0{background:var(--dark);justify-content:center;align-items:center;text-align:center;}
 
-    .nav-btn {
-      background: none;
-      border: 1.5px solid rgba(255,255,255,0.35);
-      color: #fff;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 6px 18px;
-      border-radius: 40px;
-      cursor: pointer;
-      letter-spacing: 0.03em;
-      transition: background 0.15s, border-color 0.15s;
-      user-select: none;
-    }
-    .nav-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.8); }
-    .nav-btn:disabled { opacity: 0.22; cursor: default; }
+#p0::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 80%, rgba(186,213,57,.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 80% 20%, rgba(0,147,104,.12) 0%, transparent 60%);
+  pointer-events:none;
+}
 
-    #dots { display: flex; gap: 7px; align-items: center; }
-    .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.22);
-      cursor: pointer;
-      transition: background 0.2s, transform 0.2s;
-      border: none;
-    }
-    .dot.active { background: var(--ops-lime); transform: scale(1.4); }
-    .dot:hover:not(.active) { background: rgba(255,255,255,0.5); }
+#p0-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(186,213,57,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(186,213,57,.04) 1px, transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;
+  animation:gridDrift 20s linear infinite;
+}
+@keyframes gridDrift{from{transform:translateY(0)}to{transform:translateY(60px)}}
 
-    #slide-label {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 10px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.4);
-    }
+.cover-inner{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;
+  gap:0;padding[118;1:3u:0 24px;
+}
 
-    /* ── COVER ── */
-    #s0 {
-      background: var(--ops-dark);
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 48px 40px 80px;
-      gap: 0;
-    }
+.cover-badge{
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--lime);background:rgba(186,213,57,.1);
+  padding:5px 16px;border-radius:40px;
+  border:1px solid rgba(186,213,57,.35);
+  margin-bottom:28px;
+  animation:fadeUp .8s .2s both ease;
+}
 
-    .cover-tag {
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--ops-lime);
-      background: rgba(186,213,57,0.1);
-      padding: 4px 16px;
-      border-radius: 40px;
-      border: 1px solid rgba(186,213,57,0.4);
-      margin-bottom: 24px;
-      display: inline-block;
-    }
+.cover-logo-wrap{
+  margin-bottom:36px;
+  animation:fadeUp .8s .35s both ease;
+}
+.cover-logo-wrap svg{width:200px;height:auto;}
 
-    .cover-logo { margin-bottom: 28px; }
-    .cover-logo svg { width: 190px; height: auto; display: block; }
+.cover-title{
+  font-family:var(--serif);
+  font-size:clamp(52px,8vw,96px);
+  font-weight:900;color:#fff;
+  line-height:.95;
+  margin-bottom:16px;
+  animation:fadeUp .8s .5s both ease;
+}
+.cover-title em{color:var(--lime);font-style:italic;}
 
-    .cover-title {
-      font-family: 'Fraunces', serif;
-      font-size: 52px;
-      font-weight: 900;
-      color: #fff;
-      line-height: 1.0;
-      margin-bottom: 12px;
-    }
-    .cover-title em { color: var(--ops-lime); font-style: italic; }
+.cover-sub{
+  font-size:15px;color:rgba(255,255,255,.45);
+  margin-bottom:44px;letter-spacing:.03em;
+  animation:fadeUp .8s .65s both ease;
+}
 
-    .cover-sub {
-      font-size: 14px;
-      color: rgba(255,255,255,0.45);
-      margin-bottom: 36px;
-      letter-spacing: 0.02em;
-    }
+.cover-chips{
+  display:flex;gap:10px;flex-wrap:wrap;justify-content:center;
+  max-width:520px;
+  animation:fadeUp .8s .8s both ease;
+}
+.chip{font-size:11px;padding:6px 16px;border-radius:40px;font-weight:600;letter-spacing:.03em;cursor:pointer;transition:transform .2s,background .2s;}
+.chip:hover{transform:translateY(-2px);}
+.chip-lime{color:var(--lime);border:1px solid rgba(186,213,57,.45);background:rgba(186,213,57,.08);}
+.chip-white{color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);}
 
-    .cover-chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; max-width: 460px; }
-    .chip {
-      font-size: 11px;
-      padding: 5px 14px;
-      border-radius: 40px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-    .chip-lime { color: var(--ops-lime); border: 1px solid rgba(186,213,57,0.4); background: rgba(186,213,57,0.08); }
-    .chip-white { color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+.cover-scroll-hint{
+  position:absolute;bottom:80px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  animation:fadeUp .8s 1.1s both ease;
+}
+.scroll-hint-text{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);}
+.scroll-hint-arrow{
+  width:24px;height:24px;border-right:2px solid rgba(255,255,255,.3);
+  border-bottom:2px solid rgba(255,255,255,.3);
+  transform:rotate(45deg);
+  animation:bounce 1.6s infinite ease;
+}
+@keyframes bounce{0%,100%{transform:rotate(45deg) translateY(0)}50%{transform:rotate(45deg) translateY(5px)}}
 
-    /* ── Chapter layout ── */
-    .ch-wrap { flex-direction: row; width: 100%; }
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
 
-    .sidebar {
-      width: 210px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 32px 24px 80px;
-      position: relative;
-    }
+/* ══════════════════════════════════
+   CHAPTER PAGES — shared layout
+══════════════════════════════════ */
+.ch-page{flex-direction:row;}
 
-    .sb-num {
-      font-family: 'Fraunces', serif;
-      font-size: 96px;
-      font-weight: 900;
-      line-height: 1;
-      position: absolute;
-      top: 18px; left: 16px;
-      letter-spacing: -5px;
-      opacity: 0.13;
-    }
+.ch-sidebar{
+  width:clamp(180px,22vw,280px);
+  flex-shrink:0;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:clamp(24px,4vw,48px) clamp(20px,3vw,36px) 90px;
+  position:relative;overflow:hidden;
+}
+.ch-sidebar::after{
+  content:'';position:absolute;right:-1px;top:10%;bottom:10%;
+  width:1px;background:rgba(255,255,255,.08);
+}
 
-    .sb-label {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      font-weight: 700;
-      margin-bottom: 8px;
-      opacity: 0.6;
-    }
+.sb-bignum{
+  font-family:var(--serif);
+  font-size:clamp(100px,16vw,180px);
+  font-weight:900;line-height:1;
+  position:absolute;top:clamp(10px,2vw,20px);left:clamp(10px,2vw,16px);
+  letter-spacing:-8px;opacity:.1;
+  pointer-events:none;
+  transition:opacity .4s;
+}
+.ch-page:hover .sb-bignum{opacity:.16;}
 
-    .sb-title {
-      font-family: 'Fraunces', serif;
-      font-size: 23px;
-      font-weight: 700;
-      line-height: 1.2;
-    }
+.sb-label{
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  font-weight:700;margin-bottom:10px;opacity:.6;
+}
+.sb-title{
+  font-family:var(--serif);
+  font-size:clamp(22px,3vw,32px);
+  font-weight:700;line-height:1.2;
+}
+.sb-tagline{
+  font-size:12px;margin-top:10px;opacity:.55;line-height:1.5;
+}
 
-    #s1 .sidebar { background: var(--ops-mid); color: #fff; }
-    #s1 .sb-num  { color: #fff; }
-    #s2 .sidebar { background: var(--ops-lime); color: var(--ops-dark); }
-    #s2 .sb-num, #s2 .sb-label, #s2 .sb-title { color: var(--ops-dark); }
-    #s3 .sidebar { background: var(--ops-dark); color: #fff; }
-    #s3 .sb-num  { color: #fff; }
-    #s4 .sidebar { background: var(--ops-bright); color: #fff; }
-    #s4 .sb-num  { color: #fff; }
-    #s5 .sidebar { background: var(--ops-dark); color: #fff; }
-    #s5 .sb-num  { color: #fff; }
+/* sidebar colors */
+#p1 .ch-sidebar{background:var(--mid);color:#fff;}
+#p1 .sb-bignum{color:#fff;}
+#p2 .ch-sidebar{background:var(--lime);color:var(--dark);}
+#p2 .sb-bignum,#p2 .sb-label,#p2 .sb-title,#p2 .sb-tagline{color:var(--dark);}
+#p3 .ch-sidebar{background:var(--dark);color:#fff;}
+#p3 .sb-bignum{color:#fff;}
+#p4 .ch-sidebar{background:var(--bright);color:#fff;}
+#p4 .sb-bignum{color:#fff;}
+#p5 .ch-sidebar{background:var(--dark);color:#fff;}
+#p5 .sb-bignum{color:#fff;}
 
-    /* ── Chapter body ── */
-    .ch-body {
-      flex: 1;
-      padding: 28px 24px 80px 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      overflow-y: auto;
-      background: var(--ops-offwhite);
-    }
-    .ch-body::-webkit-scrollbar { width: 4px; }
-    .ch-body::-webkit-scrollbar-thumb { background: var(--ops-lime-light); border-radius: 4px; }
+/* chapter body */
+.ch-body{
+  flex:1;
+  overflow-y:auto;
+  padding:clamp(24px,4vw,48px) clamp(20px,4vw,48px) 90px clamp(20px,3vw,36px);
+  background:var(--offwhite);
+  display:flex;flex-direction:column;gap:clamp(12px,2vh,20px);
+}
+.ch-body::-webkit-scrollbar{width:4px;}
+.ch-body::-webkit-scrollbar-thumb{background:var(--lime-light);border-radius:4px;}
 
-    /* ── Cards ── */
-    .card {
-      background: #fff;
-      border: 1.5px solid var(--ops-dark);
-      border-radius: 14px;
-      padding: 14px 16px;
-    }
+/* stagger children on enter */
+.page.active .ch-body > *{
+  animation:staggerIn .5s both ease;
+}
+.page.active .ch-body > *:nth-child(1){animation-delay:.1s}
+.page.active .ch-body > *:nth-child(2){animation-delay:.2s}
+.page.active .ch-body > *:nth-child(3){animation-delay:.3s}
+.page.active .ch-body > *:nth-child(4){animation-delay:.4s}
+.page.active .ch-body > *:nth-child(5){animation-delay:.5s}
+.page.active .ch-body > *:nth-child(6){animation-delay:.55s}
+@keyframes staggerIn{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:translateY(0)}
+}
 
-    .card-title {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--ops-mid);
-      margin-bottom: 8px;
-    }
+/* ── CARDS ── */
+.card{
+  background:#fff;border:1.5px solid var(--dark);
+  border-radius:16px;padding:clamp(14px,2vw,20px) clamp(16px,2.5vw,24px);
+  transition:transform .25s, box-shadow .25s;
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--lime);transform:scaleX(0);transform-origin:left;
+  transition:transform .3s ease;border-radius:16px 16px 0 0;
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(13,61,46,.1);}
+.card:hover::before{transform:scaleX(1);}
 
-    .card p, .card li {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 13px;
-      line-height: 1.68;
-      color: var(--ops-text-dark);
-    }
+.card-title{
+  font-size:10px;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--mid);margin-bottom:10px;
+}
+.card p,.card li{
+  font-size:clamp(13px,1.4vw,15px);line-height:1.7;color:var(--text);
+}
 
-    /* Pull quote */
-    .pq {
-      border-left: 3px solid var(--ops-lime);
-      padding: 9px 16px;
-      background: #fff;
-      border-radius: 0 12px 12px 0;
-    }
-    .pq p {
-      font-family: 'Fraunces', serif;
-      font-size: 15px;
-      font-style: italic;
-      color: var(--ops-dark);
-      line-height: 1.55;
-    }
+/* pull quote */
+.pq{
+  border-left:4px solid var(--lime);
+  padding:12px 20px;
+  background:#fff;
+  border-radius:0 14px 14px 0;
+  position:relative;
+}
+.pq::before{
+  content:'\201C';
+  font-family:var(--serif);
+  font-size:80px;line-height:1;
+  color:var(--lime);opacity:.25;
+  position:absolute;top:-8px;left:10px;
+  pointer-events:none;
+}
+.pq p{
+  font-family:var(--serif);
+  font-size:clamp(15px,1.8vw,19px);
+  font-style:italic;color:var(--dark);line-height:1.55;
+  position:relative;z-index:1;
+}
 
-    /* Steps list */
-    .steps { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-    .steps li { display: flex; gap: 10px; align-items: flex-start; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; line-height: 1.55; color: var(--ops-text-dark); }
-    .step-n {
-      width: 21px; height: 21px;
-      border-radius: 50%;
-      background: var(--ops-mid);
-      color: #fff;
-      font-size: 10px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; margin-top: 1px;
-    }
+/* steps */
+.steps{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.steps li{display:flex;gap:12px;align-items:flex-start;font-size:clamp(13px,1.4vw,15px);line-height:1.6;color:var(--text);}
+.step-n{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--mid);color:#fff;
+  font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:2px;
+}
 
-    /* Two col */
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .mini-card { background: #fff; border: 1.5px solid var(--ops-dark); border-radius: 12px; padding: 12px 14px; }
-    .mini-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; color: var(--ops-mid); }
-    .mini-card p { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; line-height: 1.58; color: var(--ops-text-dark); }
+/* two col */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1.5vw,16px);}
+.mini-card{
+  background:#fff;border:1.5px solid var(--dark);border-radius:14px;
+  padding:clamp(12px,1.5vw,16px) clamp(14px,2vw,18px);
+  transition:transform .2s;
+}
+.mini-card:hover{transform:translateY(-2px);}
+.mini-title{font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:6px;color:var(--mid);}
+.mini-card p{font-size:clamp(12px,1.3vw,14px);line-height:1.6;color:var(--text);}
 
-    /* VS row */
-    .vs-row { display: flex; gap: 8px; align-items: stretch; }
-    .vs-card { flex: 1; border: 1.5px solid var(--ops-dark); border-radius: 12px; padding: 12px 14px; }
-    .vs-label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; }
-    .vs-divider { width: 26px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--ops-mid); flex-shrink: 0; }
-    .vs-card p, .vs-card li { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; line-height: 1.6; color: var(--ops-text-dark); }
+/* vs row */
+.vs-row{display:flex;gap:clamp(8px,1vw,12px);align-items:stretch;}
+.vs-card{flex:1;border:1.5px solid var(--dark);border-radius:14px;padding:clamp(12px,1.5vw,16px) clamp(14px,2vw,18px);}
+.vs-label{font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:8px;}
+.vs-divider{width:28px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--mid);flex-shrink:0;}
+.vs-card p,.vs-card li{font-size:clamp(12px,1.3vw,14px);line-height:1.65;color:var(--text);}
 
-    /* Tags */
-    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-    .tag { padding: 3px 12px; border-radius: 40px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 500; background: var(--ops-offwhite); color: var(--ops-mid); border: 1px solid var(--ops-lime-light); }
+/* tags */
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
+.tag{
+  padding:5px 14px;border-radius:40px;
+  font-size:12px;font-weight:500;
+  background:var(--offwhite);color:var(--mid);
+  border:1px solid var(--lime-light);
+  transition:background .2s,transform .15s;
+  cursor:default;
+}
+.tag:hover{background:var(--lime-light);transform:translateY(-1px);}
 
-    /* Dark mantra box */
-    .dark-box { background: var(--ops-dark); border-radius: 14px; padding: 16px 18px; }
-    .dark-box-label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ops-lime); margin-bottom: 8px; font-weight: 700; }
-    .dark-box p { font-family: 'Fraunces', serif; font-size: 14px; font-style: italic; line-height: 1.6; color: rgba(255,255,255,0.9); }
+/* dark box */
+.dark-box{background:var(--dark);border-radius:16px;padding:clamp(16px,2.5vw,24px) clamp(18px,3vw,28px);}
+.dark-box-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--lime);margin-bottom:8px;font-weight:700;}
+.dark-box p{font-family:var(--serif);font-size:clamp(14px,1.6vw,17px);font-style:italic;line-height:1.65;color:rgba(255,255,255,.9);}
 
-    /* Seasons grid */
-    .season-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .season-item { background: #fff; border: 1.5px solid var(--ops-dark); border-radius: 10px; padding: 10px 12px; }
-    .season-dot { width: 10px; height: 10px; border-radius: 50%; margin-bottom: 5px; }
-    .season-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; color: var(--ops-dark); margin-bottom: 3px; }
-    .season-text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; color: #3a5a40; line-height: 1.45; }
+/* season grid */
+.season-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(8px,1vw,12px);}
+.season-item{
+  background:#fff;border:1.5px solid var(--dark);border-radius:12px;
+  padding:clamp(10px,1.5vw,14px) clamp(12px,1.8vw,16px);
+  transition:transform .2s,box-shadow .2s;
+}
+.season-item:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(13,61,46,.1);}
+.season-dot{width:10px;height:10px;border-radius:50%;margin-bottom:6px;}
+.season-title{font-size:13px;font-weight:700;color:var(--dark);margin-bottom:3px;}
+.season-text{font-size:11.5px;color:#3a5a40;line-height:1.45;}
 
-    /* Lime box */
-    .lime-box { background: var(--ops-lime); border-radius: 14px; padding: 14px 16px; }
-    .lime-box-label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ops-dark); margin-bottom: 7px; font-weight: 700; opacity: 0.55; }
-    .lime-box p { font-family: 'Fraunces', serif; font-size: 14px; font-style: italic; color: var(--ops-dark); line-height: 1.58; }
+/* lime box */
+.lime-box{background:var(--lime);border-radius:16px;padding:clamp(14px,2vw,20px) clamp(16px,2.5vw,24px);}
+.lime-box-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dark);margin-bottom:8px;font-weight:700;opacity:.55;}
+.lime-box p{font-family:var(--serif);font-size:clamp(14px,1.6vw,17px);font-style:italic;color:var(--dark);line-height:1.6;}
 
-    /* Day 1 tip box */
-    .day1 { background: #fff; border: 1.5px solid var(--ops-lime); border-radius: 12px; padding: 12px 15px; }
-    .day1-label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ops-lime); margin-bottom: 7px; }
-    .day1 p { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; line-height: 1.62; color: var(--ops-text-dark); }
-    .day1 p span { color: var(--ops-mid); font-weight: 600; }
+/* day 1 tip */
+.day1{
+  background:#fff;border:2px solid var(--lime);border-radius:14px;
+  padding:clamp(12px,1.5vw,16px) clamp(14px,2vw,20px);
+  position:relative;
+}
+.day1-label{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);margin-bottom:7px;}
+.day1 p{font-size:clamp(12.5px,1.4vw,14.5px);line-height:1.65;color:var(--text);}
+.day1 p span{color:var(--mid);font-weight:700;}
 
-    /* ── Letter slide ── */
-    .letter-body {
-      flex: 1;
-      padding: 36px 32px 80px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      background: var(--ops-dark);
-      overflow-y: auto;
-    }
-    .letter-body::-webkit-scrollbar { width: 4px; }
-    .letter-body::-webkit-scrollbar-thumb { background: rgba(186,213,57,0.3); border-radius: 4px; }
+/* ══════════════════════════════════
+   PAGE 5 — LETTER
+══════════════════════════════════ */
+#p5{flex-direction:row;}
 
-    .letter-to {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--ops-lime);
-      margin-bottom: 20px;
-      font-weight: 600;
-    }
+.letter-body{
+  flex:1;
+  overflow-y:auto;
+  padding:clamp(36px,6vw,72px) clamp(32px,6vw,80px) 90px;
+  background:var(--dark);
+  display:flex;flex-direction:column;justify-content:center;
+  position:relative;
+}
+.letter-body::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 70% 60% at 90% 10%, rgba(186,213,57,.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 70% at 10% 90%, rgba(0,147,104,.08) 0%, transparent 60%);
+  pointer-events:none;
+}
+.letter-body::-webkit-scrollbar{width:4px;}
+.letter-body::-webkit-scrollbar-thumb{background:rgba(186,213,57,.25);border-radius:4px;}
 
-    .letter-p {
-      font-family: 'Fraunces', serif;
-      font-size: 15px;
-      font-style: italic;
-      color: rgba(255,255,255,0.88);
-      line-height: 1.78;
-      margin-bottom: 16px;
-    }
-    .letter-p strong { font-style: normal; font-weight: 700; color: var(--ops-lime); }
+.letter-to{
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--lime);margin-bottom:24px;font-weight:700;
+  position:relative;z-index:1;
+}
 
-    .letter-sign {
-      margin-top: 24px;
-      border-top: 1px solid rgba(186,213,57,0.2);
-      padding-top: 18px;
-    }
-    .letter-sign-name {
-      font-family: 'Fraunces', serif;
-      font-size: 21px;
-      font-weight: 700;
-      font-style: italic;
-      color: #fff;
-      margin-bottom: 4px;
-    }
-    .letter-sign-role {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 11px;
-      color: rgba(255,255,255,0.38);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
+.letter-p{
+  font-family:var(--serif);
+  font-size:clamp(16px,2vw,21px);
+  font-style:italic;
+  color:rgba(255,255,255,.88);
+  line-height:1.85;
+  margin-bottom:20px;
+  position:relative;z-index:1;
+}
+.letter-p strong{font-style:normal;font-weight:700;color:var(--lime);}
 
-    /* ── Keyboard hint ── */
-    #kb-hint {
-      position: absolute;
-      top: 14px;
-      right: 18px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 10px;
-      color: rgba(255,255,255,0.28);
-      letter-spacing: 0.08em;
-      z-index: 20;
-      pointer-events: none;
-    }
+.letter-sign{
+  margin-top:32px;
+  border-top:1px solid rgba(186,213,57,.2);
+  padding-top:22px;
+  position:relative;z-index:1;
+}
+.letter-sign-name{
+  font-family:var(--serif);
+  font-size:clamp(20px,2.5vw,28px);
+  font-weight:700;font-style:italic;
+  color:#fff;margin-bottom:4px;
+}
+.letter-sign-role{
+  font-size:11px;color:rgba(255,255,255,.35);
+  letter-spacing:.12em;text-transform:uppercase;
+}
 
-    /* ── Responsive ── */
-    @media (max-width: 640px) {
-      .sidebar { width: 70px; padding: 20px 10px 80px; }
-      .sb-num { font-size: 52px; top: 8px; left: 6px; }
-      .sb-label { display: none; }
-      .sb-title { font-size: 13px; }
-      .cover-title { font-size: 36px; }
-      .two-col { grid-template-columns: 1fr; }
-      .vs-row { flex-direction: column; }
-      .vs-divider { display: none; }
-      .season-grid { grid-template-columns: 1fr; }
-      .ch-body { padding: 18px 14px 80px 12px; }
-    }
-  </style>
+/* letter stagger */
+#p5.active .letter-body > *{animation:staggerIn .6s both ease;}
+#p5.active .letter-body > *:nth-child(1){animation-delay:.15s}
+#p5.active .letter-body > *:nth-child(2){animation-delay:.3s}
+#p5.active .letter-body > *:nth-child(3){animation-delay:.45s}
+#p5.active .letter-body > *:nth-child(4){animation-delay:.6s}
+#p5.active .letter-body > *:nth-child(5){animation-delay:.75s}
+#p5.active .letter-body > *:nth-child(6){animation-delay:.9s}
+
+/* ══════════════════════════════════
+   MENU OVERLAY
+══════════════════════════════════ */
+#menu-overlay{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease;
+}
+#menu-overlay.open{opacity:1;pointer-events:all;}
+
+.menu-inner{
+  background:var(--dark);border:1.5px solid rgba(186,213,57,.2);
+  border-radius:24px;padding:40px;
+  display:flex;flex-direction:column;gap:10px;
+  min-width:320px;
+  transform:scale(.92);
+  transition:transform .3s ease;
+}
+#menu-overlay.open .menu-inner{transform:scale(1);}
+
+.menu-title{
+  font-family:var(--serif);font-size:13px;font-style:italic;
+  color:rgba(255,255,255,.4);margin-bottom:16px;
+  letter-spacing:.05em;
+}
+.menu-item{
+  background:none;border:1px solid rgba(255,255,255,.1);
+  color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;
+  padding:14px 20px;border-radius:12px;
+  cursor:pointer;text-align:left;
+  display:flex;align-items:center;gap:14px;
+  transition:background .2s,border-color .2s,transform .15s;
+}
+.menu-item:hover{background:rgba(255,255,255,.07);border-color:rgba(186,213,57,.4);transform:translateX(4px);}
+.menu-item.current{border-color:var(--lime);color:var(--lime);}
+.menu-num{
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;flex-shrink:0;
+  transition:background .2s;
+}
+.menu-item.current .menu-num,.menu-item:hover .menu-num{background:var(--lime);color:var(--dark);}
+.menu-close{
+  margin-top:12px;
+  background:none;border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.5);font-family:var(--sans);font-size:12px;
+  padding:10px;border-radius:10px;cursor:pointer;
+  transition:background .2s,color .2s;
+}
+.menu-close:hover{background:rgba(255,255,255,.08);color:#fff;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .ch-sidebar{width:64px;padding:16px 10px 80px;}
+  .sb-bignum{font-size:64px;top:6px;left:4px;}
+  .sb-label,.sb-tagline{display:none;}
+  .sb-title{font-size:14px;}
+  .two-col{grid-template-columns:1fr;}
+  .vs-row{flex-direction:column;}
+  .vs-divider{display:none;}
+  .season-grid{grid-template-columns:1fr;}
+  .ch-body{padding:18px 16px 80px 14px;}
+  .cover-title{font-size:42px;}
+  .letter-body{padding:28px 22px 90px;}
+  #global-nav{padding:12px 18px;}
+  #bottom-nav{padding:14px 18px;}
+}
+</style>
 </head>
 <body>
 
-<div id="app">
-  <div id="progress-bar" style="width:0%"></div>
-  <span id="kb-hint">use ← → keys to navigate</span>
+<!-- Progress -->
+<div id="progress" style="width:0%"></div>
 
-  <!-- ═══════════════════════════════ COVER ═══════════════════════════════ -->
-  <div class="slide active" id="s0">
-    <div class="cover-tag">OpsWerks Internship · 2026</div>
+<!-- Global Nav -->
+<div id="global-nav">
+  <div id="nav-logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160.009 28.113" overflow="visible">
+      <path d="M 41.319 2.222 C 37.004 2.221 33.114 4.824 31.47 8.815 C 29.826 12.805 30.753 17.392 33.817 20.432 C 36.881 23.471 41.476 24.36 45.452 22.684 C 49.429 21.007 52.001 17.097 51.964 12.781 C 51.932 6.93 47.171 2.207 41.319 2.222 Z M 48.934 12.781 C 48.934 17.35 45.732 20.666 41.319 20.666 C 36.907 20.666 33.701 17.35 33.701 12.781 C 33.701 8.391 36.978 5.077 41.319 5.077 C 45.661 5.077 48.934 8.391 48.934 12.781 Z M 61.255 8.38 C 59.397 8.354 57.638 9.22 56.524 10.708 L 56.524 9.247 C 56.534 9.124 56.488 9.002 56.401 8.915 C 56.313 8.827 56.192 8.782 56.068 8.791 L 54.2 8.791 C 54.077 8.783 53.957 8.829 53.87 8.916 C 53.784 9.004 53.739 9.124 53.748 9.247 L 53.748 27.66 C 53.739 27.782 53.783 27.903 53.87 27.99 C 53.957 28.076 54.077 28.121 54.2 28.112 L 56.068 28.112 C 56.191 28.121 56.312 28.076 56.399 27.99 C 56.487 27.903 56.532 27.783 56.524 27.66 L 56.524 21.229 C 57.643 22.708 59.401 23.562 61.255 23.527 C 65.227 23.527 68.354 20.198 68.354 15.946 C 68.354 11.694 65.227 8.38 61.255 8.38 Z M 65.54 15.935 C 65.54 18.827 63.65 20.931 61.057 20.931 C 58.464 20.931 56.573 18.853 56.573 15.995 C 56.573 13.136 58.505 10.94 61.057 10.94 C 63.608 10.94 65.54 13.088 65.54 15.935 Z M 75.385 14.504 L 75.287 14.504 C 73.02 14.153 72.138 13.585 72.138 12.486 C 72.138 11.036 73.808 10.82 74.805 10.82 C 76.281 10.77 77.7 11.388 78.669 12.501 C 78.743 12.605 78.859 12.671 78.987 12.68 C 79.115 12.671 79.233 12.606 79.308 12.501 L 80.399 11.235 C 80.571 11.06 80.571 10.781 80.399 10.606 C 78.968 9.146 77.077 8.406 74.795 8.406 C 71.181 8.406 69.563 10.557 69.563 12.692 C 69.563 15.098 71.259 16.529 74.749 17.063 C 76.957 17.392 78.31 17.665 78.31 19.084 C 78.32 19.728 77.968 20.323 77.398 20.624 C 76.693 20.99 75.905 21.165 75.112 21.132 C 73.523 21.196 71.999 20.503 71.002 19.264 C 70.932 19.149 70.814 19.072 70.681 19.055 C 70.55 19.054 70.428 19.122 70.359 19.234 L 69.268 20.65 C 69.108 20.84 69.121 21.122 69.298 21.297 C 70.86 22.859 72.661 23.539 75.093 23.539 C 76.528 23.584 77.941 23.185 79.139 22.395 C 80.261 21.603 80.913 20.304 80.877 18.932 C 80.859 15.359 77.821 14.878 75.384 14.504 Z" fill="rgb(255,255,255)"/>
+      <path d="M 112.42 2.93 C 112.342 2.829 112.216 2.775 112.088 2.788 L 110.081 2.788 C 109.853 2.767 109.641 2.909 109.573 3.129 L 103.748 19.117 L 97.926 3.132 C 97.859 2.911 97.645 2.768 97.415 2.789 L 95.173 2.789 C 94.945 2.768 94.733 2.91 94.665 3.129 L 88.869 19.117 L 83.049 3.132 C 82.981 2.911 82.767 2.768 82.537 2.789 L 80.505 2.789 C 80.377 2.776 80.251 2.83 80.172 2.931 C 80.095 3.049 80.084 3.198 80.142 3.327 L 87.357 22.909 C 87.426 23.126 87.635 23.267 87.861 23.249 L 89.835 23.249 C 90.063 23.271 90.275 23.129 90.342 22.909 L 96.321 6.712 L 102.258 22.902 C 102.326 23.123 102.539 23.268 102.77 23.249 L 104.716 23.249 C 104.945 23.269 105.157 23.128 105.225 22.909 L 112.444 3.315 C 112.497 3.191 112.489 3.048 112.421 2.93 Z M 117.53 8.531 C 113.494 8.531 110.33 11.895 110.33 16.172 C 110.33 20.377 113.532 23.668 117.62 23.668 C 119.863 23.676 122.008 22.748 123.538 21.108 C 123.708 20.935 123.708 20.657 123.538 20.484 L 122.357 19.217 C 122.279 19.123 122.163 19.069 122.04 19.068 C 121.912 19.08 121.796 19.147 121.722 19.251 C 120.713 20.446 119.217 21.119 117.653 21.082 C 115.251 21.082 113.428 19.304 113.196 16.748 L 123.897 16.748 C 124.087 16.768 124.267 16.655 124.331 16.474 C 124.352 16.416 124.359 16.354 124.353 16.292 C 124.382 13.953 123.624 11.88 122.223 10.459 C 120.983 9.21 119.29 8.515 117.53 8.531 Z M 121.513 14.749 L 113.319 14.749 C 113.828 12.507 115.471 11.091 117.53 11.091 C 119.588 11.091 121.162 12.589 121.513 14.749 Z M 133.82 8.775 C 133.365 8.626 132.89 8.545 132.412 8.535 C 130.992 8.535 129.766 9.394 129.008 10.908 L 129.008 9.413 C 129.017 9.29 128.972 9.169 128.885 9.082 C 128.799 8.995 128.678 8.95 128.556 8.958 L 126.668 8.958 C 126.48 8.945 126.305 9.057 126.238 9.233 C 126.217 9.291 126.209 9.352 126.213 9.413 L 126.213 22.801 C 126.204 22.924 126.249 23.045 126.337 23.133 C 126.424 23.22 126.545 23.265 126.668 23.257 L 128.556 23.257 C 128.678 23.264 128.799 23.219 128.885 23.131 C 128.972 23.044 129.017 22.923 129.008 22.801 L 129.008 15.436 C 129.008 12.753 130.181 11.151 132.147 11.151 C 132.46 11.146 132.771 11.204 133.061 11.32 C 133.183 11.386 133.328 11.396 133.458 11.345 C 133.51 11.317 133.555 11.278 133.589 11.23 C 133.625 11.182 133.649 11.127 133.66 11.069 L 134.1 9.361 C 134.173 9.123 134.052 8.868 133.82 8.775 Z M 147.543 9.537 C 147.669 9.443 147.723 9.28 147.678 9.129 C 147.603 8.997 147.455 8.923 147.304 8.943 L 144.801 8.943 C 144.603 8.947 144.415 9.028 144.277 9.17 L 138.038 15.295 L 138.038 2.064 C 138.047 1.94 138.002 1.819 137.914 1.732 C 137.827 1.644 137.706 1.599 137.582 1.608 L 135.714 1.608 C 135.591 1.599 135.47 1.645 135.382 1.732 C 135.295 1.82 135.25 1.94 135.258 2.064 L 135.258 22.801 C 135.249 22.925 135.295 23.046 135.382 23.133 C 135.47 23.22 135.591 23.265 135.714 23.257 L 137.582 23.257 C 137.706 23.265 137.827 23.22 137.914 23.133 C 138.002 23.045 138.047 22.924 138.038 22.801 L 138.038 16.243 L 144.124 23.025 C 144.258 23.178 144.453 23.26 144.655 23.249 L 147.188 23.249 C 147.341 23.261 147.486 23.184 147.562 23.051 C 147.585 22.983 147.588 22.91 147.571 22.841 C 147.554 22.771 147.517 22.708 147.465 22.659 L 141.06 15.612 L 147.517 9.532 Z M 154.526 14.656 L 154.429 14.656 C 152.164 14.305 151.279 13.737 151.279 12.638 C 151.279 11.188 152.953 10.971 153.947 10.971 C 155.422 10.921 156.842 11.539 157.811 12.653 C 157.914 12.826 158.138 12.885 158.313 12.785 C 158.369 12.753 158.416 12.708 158.45 12.653 L 159.54 11.386 C 159.711 11.212 159.711 10.933 159.54 10.758 C 158.132 9.32 156.178 8.558 153.936 8.558 C 150.326 8.558 148.705 10.709 148.705 12.843 C 148.705 15.249 150.401 16.681 153.895 17.215 C 156.103 17.544 157.455 17.817 157.455 19.236 C 157.467 19.881 157.112 20.477 156.54 20.776 C 155.837 21.142 155.049 21.317 154.257 21.284 C 152.668 21.347 151.144 20.654 150.148 19.416 C 150.077 19.301 149.959 19.225 149.826 19.207 C 149.7 19.218 149.586 19.283 149.512 19.385 L 148.391 20.757 C 148.233 20.948 148.247 21.229 148.425 21.403 C 149.987 22.965 151.788 23.645 154.22 23.645 C 155.655 23.691 157.07 23.292 158.27 22.502 C 159.391 21.71 160.043 20.41 160.007 19.038 C 160 15.511 156.985 15.029 154.526 14.656 Z M 11.09 5.449 L 1.618 0.147 C 1.292 -0.044 0.89 -0.049 0.558 0.132 C 0.227 0.313 0.015 0.655 0 1.033 L 0 11.121 C 0.003 11.491 0.206 11.83 0.531 12.007 L 3.864 13.874 L 5.007 14.514 L 5.116 14.454 L 10.264 11.574 C 10.538 11.413 10.876 11.408 11.155 11.561 C 11.433 11.714 11.61 12.003 11.62 12.321 L 11.62 6.334 C 11.616 5.965 11.413 5.626 11.09 5.449 Z" fill="rgb(0,147,104)"/>
+      <path d="M 9.901 17.465 L 4.906 14.667 L 2.222 16.161 C 1.949 16.31 1.778 16.596 1.778 16.908 L 1.778 25.348 C 1.788 25.666 1.965 25.955 2.243 26.108 C 2.522 26.262 2.86 26.257 3.134 26.096 L 11.07 21.65 C 11.345 21.502 11.518 21.215 11.519 20.903 L 11.519 16.58 C 11.503 16.957 11.291 17.298 10.96 17.479 C 10.629 17.66 10.227 17.655 9.901 17.465 Z" fill="rgb(186,213,57)"/>
+      <path d="M 10.146 11.68 L 4.997 14.56 L 4.889 14.62 L 9.884 17.419 C 10.211 17.609 10.612 17.614 10.943 17.433 C 11.275 17.252 11.487 16.91 11.502 16.533 L 11.502 12.423 C 11.491 12.106 11.313 11.819 11.035 11.666 C 10.757 11.514 10.419 11.519 10.146 11.68 Z" fill="rgb(1,96,63)"/>
+      <path d="M 23.335 0.147 L 13.864 5.448 C 13.539 5.625 13.336 5.965 13.333 6.335 L 13.333 12.29 C 13.344 11.974 13.52 11.686 13.797 11.533 C 14.075 11.38 14.412 11.384 14.685 11.543 L 19.835 14.423 L 19.947 14.483 L 21.09 13.845 L 24.419 11.976 C 24.743 11.8 24.947 11.461 24.949 11.091 L 24.949 1.032 C 24.935 0.655 24.724 0.314 24.393 0.132 C 24.062 -0.049 23.661 -0.044 23.335 0.147 Z" fill="rgb(0,147,104)"/>
+      <path d="M 13.333 16.577 L 13.333 20.908 C 13.333 21.219 13.504 21.506 13.778 21.654 L 21.717 26.101 C 21.991 26.261 22.329 26.264 22.606 26.111 C 22.883 25.958 23.059 25.67 23.07 25.354 L 23.07 16.909 C 23.07 16.598 22.899 16.312 22.626 16.163 L 19.947 14.667 L 14.948 17.465 C 14.621 17.656 14.219 17.661 13.888 17.479 C 13.557 17.297 13.346 16.954 13.333 16.576 Z" fill="rgb(186,213,57)"/>
+      <path d="M 14.685 11.677 C 14.412 11.518 14.075 11.515 13.798 11.668 C 13.521 11.821 13.345 12.108 13.333 12.424 L 13.333 16.534 C 13.347 16.911 13.558 17.254 13.889 17.435 C 14.22 17.617 14.622 17.611 14.948 17.42 L 19.947 14.621 L 19.835 14.562 Z" fill="rgb(1,96,63)"/>
+    </svg>
+  </div>
+  <div id="nav-right">
+    <span id="nav-chapter"></span>
+    <button id="menu-btn" onclick="toggleMenu()" aria-label="Open chapter menu">☰</button>
+  </div>
+</div>
 
-    <div class="cover-logo">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160.009 28.113" overflow="visible">
-        <path d="M 41.319 2.222 C 37.004 2.221 33.114 4.824 31.47 8.815 C 29.826 12.805 30.753 17.392 33.817 20.432 C 36.881 23.471 41.476 24.36 45.452 22.684 C 49.429 21.007 52.001 17.097 51.964 12.781 C 51.932 6.93 47.171 2.207 41.319 2.222 Z M 48.934 12.781 C 48.934 17.35 45.732 20.666 41.319 20.666 C 36.907 20.666 33.701 17.35 33.701 12.781 C 33.701 8.391 36.978 5.077 41.319 5.077 C 45.661 5.077 48.934 8.391 48.934 12.781 Z M 61.255 8.38 C 59.397 8.354 57.638 9.22 56.524 10.708 L 56.524 9.247 C 56.534 9.124 56.488 9.002 56.401 8.915 C 56.313 8.827 56.192 8.782 56.068 8.791 L 54.2 8.791 C 54.077 8.783 53.957 8.829 53.87 8.916 C 53.784 9.004 53.739 9.124 53.748 9.247 L 53.748 27.66 C 53.739 27.782 53.783 27.903 53.87 27.99 C 53.957 28.076 54.077 28.121 54.2 28.112 L 56.068 28.112 C 56.191 28.121 56.312 28.076 56.399 27.99 C 56.487 27.903 56.532 27.783 56.524 27.66 L 56.524 21.229 C 57.643 22.708 59.401 23.562 61.255 23.527 C 65.227 23.527 68.354 20.198 68.354 15.946 C 68.354 11.694 65.227 8.38 61.255 8.38 Z M 65.54 15.935 C 65.54 18.827 63.65 20.931 61.057 20.931 C 58.464 20.931 56.573 18.853 56.573 15.995 C 56.573 13.136 58.505 10.94 61.057 10.94 C 63.608 10.94 65.54 13.088 65.54 15.935 Z M 75.385 14.504 L 75.287 14.504 C 73.02 14.153 72.138 13.585 72.138 12.486 C 72.138 11.036 73.808 10.82 74.805 10.82 C 76.281 10.77 77.7 11.388 78.669 12.501 C 78.743 12.605 78.859 12.671 78.987 12.68 C 79.115 12.671 79.233 12.606 79.308 12.501 L 80.399 11.235 C 80.571 11.06 80.571 10.781 80.399 10.606 C 78.968 9.146 77.077 8.406 74.795 8.406 C 71.181 8.406 69.563 10.557 69.563 12.692 C 69.563 15.098 71.259 16.529 74.749 17.063 C 76.957 17.392 78.31 17.665 78.31 19.084 C 78.32 19.728 77.968 20.323 77.398 20.624 C 76.693 20.99 75.905 21.165 75.112 21.132 C 73.523 21.196 71.999 20.503 71.002 19.264 C 70.932 19.149 70.814 19.072 70.681 19.055 C 70.55 19.054 70.428 19.122 70.359 19.234 L 69.268 20.65 C 69.108 20.84 69.121 21.122 69.298 21.297 C 70.86 22.859 72.661 23.539 75.093 23.539 C 76.528 23.584 77.941 23.185 79.139 22.395 C 80.261 21.603 80.913 20.304 80.877 18.932 C 80.859 15.359 77.821 14.878 75.384 14.504 Z" fill="rgb(255,255,255)"/>
-        <path d="M 112.42 2.93 C 112.342 2.829 112.216 2.775 112.088 2.788 L 110.081 2.788 C 109.853 2.767 109.641 2.909 109.573 3.129 L 103.748 19.117 L 97.926 3.132 C 97.859 2.911 97.645 2.768 97.415 2.789 L 95.173 2.789 C 94.945 2.768 94.733 2.91 94.665 3.129 L 88.869 19.117 L 83.049 3.132 C 82.981 2.911 82.767 2.768 82.537 2.789 L 80.505 2.789 C 80.377 2.776 80.251 2.83 80.172 2.931 C 80.095 3.049 80.084 3.198 80.142 3.327 L 87.357 22.909 C 87.426 23.126 87.635 23.267 87.861 23.249 L 89.835 23.249 C 90.063 23.271 90.275 23.129 90.342 22.909 L 96.321 6.712 L 102.258 22.902 C 102.326 23.123 102.539 23.268 102.77 23.249 L 104.716 23.249 C 104.945 23.269 105.157 23.128 105.225 22.909 L 112.444 3.315 C 112.497 3.191 112.489 3.048 112.421 2.93 Z M 117.53 8.531 C 113.494 8.531 110.33 11.895 110.33 16.172 C 110.33 20.377 113.532 23.668 117.62 23.668 C 119.863 23.676 122.008 22.748 123.538 21.108 C 123.708 20.935 123.708 20.657 123.538 20.484 L 122.357 19.217 C 122.279 19.123 122.163 19.069 122.04 19.068 C 121.912 19.08 121.796 19.147 121.722 19.251 C 120.713 20.446 119.217 21.119 117.653 21.082 C 115.251 21.082 113.428 19.304 113.196 16.748 L 123.897 16.748 C 124.087 16.768 124.267 16.655 124.331 16.474 C 124.352 16.416 124.359 16.354 124.353 16.292 C 124.382 13.953 123.624 11.88 122.223 10.459 C 120.983 9.21 119.29 8.515 117.53 8.531 Z M 121.513 14.749 L 113.319 14.749 C 113.828 12.507 115.471 11.091 117.53 11.091 C 119.588 11.091 121.162 12.589 121.513 14.749 Z M 133.82 8.775 C 133.365 8.626 132.89 8.545 132.412 8.535 C 130.992 8.535 129.766 9.394 129.008 10.908 L 129.008 9.413 C 129.017 9.29 128.972 9.169 128.885 9.082 C 128.799 8.995 128.678 8.95 128.556 8.958 L 126.668 8.958 C 126.48 8.945 126.305 9.057 126.238 9.233 C 126.217 9.291 126.209 9.352 126.213 9.413 L 126.213 22.801 C 126.204 22.924 126.249 23.045 126.337 23.133 C 126.424 23.22 126.545 23.265 126.668 23.257 L 128.556 23.257 C 128.678 23.264 128.799 23.219 128.885 23.131 C 128.972 23.044 129.017 22.923 129.008 22.801 L 129.008 15.436 C 129.008 12.753 130.181 11.151 132.147 11.151 C 132.46 11.146 132.771 11.204 133.061 11.32 C 133.183 11.386 133.328 11.396 133.458 11.345 C 133.51 11.317 133.555 11.278 133.589 11.23 C 133.625 11.182 133.649 11.127 133.66 11.069 L 134.1 9.361 C 134.173 9.123 134.052 8.868 133.82 8.775 Z M 147.543 9.537 C 147.669 9.443 147.723 9.28 147.678 9.129 C 147.603 8.997 147.455 8.923 147.304 8.943 L 144.801 8.943 C 144.603 8.947 144.415 9.028 144.277 9.17 L 138.038 15.295 L 138.038 2.064 C 138.047 1.94 138.002 1.819 137.914 1.732 C 137.827 1.644 137.706 1.599 137.582 1.608 L 135.714 1.608 C 135.591 1.599 135.47 1.645 135.382 1.732 C 135.295 1.82 135.25 1.94 135.258 2.064 L 135.258 22.801 C 135.249 22.925 135.295 23.046 135.382 23.133 C 135.47 23.22 135.591 23.265 135.714 23.257 L 137.582 23.257 C 137.706 23.265 137.827 23.22 137.914 23.133 C 138.002 23.045 138.047 22.924 138.038 22.801 L 138.038 16.243 L 144.124 23.025 C 144.258 23.178 144.453 23.26 144.655 23.249 L 147.188 23.249 C 147.341 23.261 147.486 23.184 147.562 23.051 C 147.585 22.983 147.588 22.91 147.571 22.841 C 147.554 22.771 147.517 22.708 147.465 22.659 L 141.06 15.612 L 147.517 9.532 Z M 154.526 14.656 L 154.429 14.656 C 152.164 14.305 151.279 13.737 151.279 12.638 C 151.279 11.188 152.953 10.971 153.947 10.971 C 155.422 10.921 156.842 11.539 157.811 12.653 C 157.914 12.826 158.138 12.885 158.313 12.785 C 158.369 12.753 158.416 12.708 158.45 12.653 L 159.54 11.386 C 159.711 11.212 159.711 10.933 159.54 10.758 C 158.132 9.32 156.178 8.558 153.936 8.558 C 150.326 8.558 148.705 10.709 148.705 12.843 C 148.705 15.249 150.401 16.681 153.895 17.215 C 156.103 17.544 157.455 17.817 157.455 19.236 C 157.467 19.881 157.112 20.477 156.54 20.776 C 155.837 21.142 155.049 21.317 154.257 21.284 C 152.668 21.347 151.144 20.654 150.148 19.416 C 150.077 19.301 149.959 19.225 149.826 19.207 C 149.7 19.218 149.586 19.283 149.512 19.385 L 148.391 20.757 C 148.233 20.948 148.247 21.229 148.425 21.403 C 149.987 22.965 151.788 23.645 154.22 23.645 C 155.655 23.691 157.07 23.292 158.27 22.502 C 159.391 21.71 160.043 20.41 160.007 19.038 C 160 15.511 156.985 15.029 154.526 14.656 Z M 11.09 5.449 L 1.618 0.147 C 1.292 -0.044 0.89 -0.049 0.558 0.132 C 0.227 0.313 0.015 0.655 0 1.033 L 0 11.121 C 0.003 11.491 0.206 11.83 0.531 12.007 L 3.864 13.874 L 5.007 14.514 L 5.116 14.454 L 10.264 11.574 C 10.538 11.413 10.876 11.408 11.155 11.561 C 11.433 11.714 11.61 12.003 11.62 12.321 L 11.62 6.334 C 11.616 5.965 11.413 5.626 11.09 5.449 Z" fill="rgb(0,147,104)"/>
-        <path d="M 9.901 17.465 L 4.906 14.667 L 2.222 16.161 C 1.949 16.31 1.778 16.596 1.778 16.908 L 1.778 25.348 C 1.788 25.666 1.965 25.955 2.243 26.108 C 2.522 26.262 2.86 26.257 3.134 26.096 L 11.07 21.65 C 11.345 21.502 11.518 21.215 11.519 20.903 L 11.519 16.58 C 11.503 16.957 11.291 17.298 10.96 17.479 C 10.629 17.66 10.227 17.655 9.901 17.465 Z" fill="rgb(186,213,57)"/>
-        <path d="M 10.146 11.68 L 4.997 14.56 L 4.889 14.62 L 9.884 17.419 C 10.211 17.609 10.612 17.614 10.943 17.433 C 11.275 17.252 11.487 16.91 11.502 16.533 L 11.502 12.423 C 11.491 12.106 11.313 11.819 11.035 11.666 C 10.757 11.514 10.419 11.519 10.146 11.68 Z" fill="rgb(1,96,63)"/>
-        <path d="M 23.335 0.147 L 13.864 5.448 C 13.539 5.625 13.336 5.965 13.333 6.335 L 13.333 12.29 C 13.344 11.974 13.52 11.686 13.797 11.533 C 14.075 11.38 14.412 11.384 14.685 11.543 L 19.835 14.423 L 19.947 14.483 L 21.09 13.845 L 24.419 11.976 C 24.743 11.8 24.947 11.461 24.949 11.091 L 24.949 1.032 C 24.935 0.655 24.724 0.314 24.393 0.132 C 24.062 -0.049 23.661 -0.044 23.335 0.147 Z" fill="rgb(0,147,104)"/>
-        <path d="M 13.333 16.577 L 13.333 20.908 C 13.333 21.219 13.504 21.506 13.778 21.654 L 21.717 26.101 C 21.991 26.261 22.329 26.264 22.606 26.111 C 22.883 25.958 23.059 25.67 23.07 25.354 L 23.07 16.909 C 23.07 16.598 22.899 16.312 22.626 16.163 L 19.947 14.667 L 14.948 17.465 C 14.621 17.656 14.219 17.661 13.888 17.479 C 13.557 17.297 13.346 16.954 13.333 16.576 Z" fill="rgb(186,213,57)"/>
-        <path d="M 14.685 11.677 C 14.412 11.518 14.075 11.515 13.798 11.668 C 13.521 11.821 13.345 12.108 13.333 12.424 L 13.333 16.534 C 13.347 16.911 13.558 17.254 13.889 17.435 C 14.22 17.617 14.622 17.611 14.948 17.42 L 19.947 14.621 L 19.835 14.562 Z" fill="rgb(1,96,63)"/>
-      </svg>
+<!-- Pages -->
+<div id="pages">
+
+  <!-- COVER -->
+  <div class="page active" id="p0">
+    <div id="p0-grid"></div>
+    <div class="cover-inner">
+      <div class="cover-badge">OpsWerks Internship · 2026</div>
+      <div class="cover-logo-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160.009 28.113" overflow="visible">
+          <path d="M 41.319 2.222 C 37.004 2.221 33.114 4.824 31.47 8.815 C 29.826 12.805 30.753 17.392 33.817 20.432 C 36.881 23.471 41.476 24.36 45.452 22.684 C 49.429 21.007 52.001 17.097 51.964 12.781 C 51.932 6.93 47.171 2.207 41.319 2.222 Z M 48.934 12.781 C 48.934 17.35 45.732 20.666 41.319 20.666 C 36.907 20.666 33.701 17.35 33.701 12.781 C 33.701 8.391 36.978 5.077 41.319 5.077 C 45.661 5.077 48.934 8.391 48.934 12.781 Z M 61.255 8.38 C 59.397 8.354 57.638 9.22 56.524 10.708 L 56.524 9.247 C 56.534 9.124 56.488 9.002 56.401 8.915 C 56.313 8.827 56.192 8.782 56.068 8.791 L 54.2 8.791 C 54.077 8.783 53.957 8.829 53.87 8.916 C 53.784 9.004 53.739 9.124 53.748 9.247 L 53.748 27.66 C 53.739 27.782 53.783 27.903 53.87 27.99 C 53.957 28.076 54.077 28.121 54.2 28.112 L 56.068 28.112 C 56.191 28.121 56.312 28.076 56.399 27.99 C 56.487 27.903 56.532 27.783 56.524 27.66 L 56.524 21.229 C 57.643 22.708 59.401 23.562 61.255 23.527 C 65.227 23.527 68.354 20.198 68.354 15.946 C 68.354 11.694 65.227 8.38 61.255 8.38 Z M 65.54 15.935 C 65.54 18.827 63.65 20.931 61.057 20.931 C 58.464 20.931 56.573 18.853 56.573 15.995 C 56.573 13.136 58.505 10.94 61.057 10.94 C 63.608 10.94 65.54 13.088 65.54 15.935 Z M 75.385 14.504 L 75.287 14.504 C 73.02 14.153 72.138 13.585 72.138 12.486 C 72.138 11.036 73.808 10.82 74.805 10.82 C 76.281 10.77 77.7 11.388 78.669 12.501 C 78.743 12.605 78.859 12.671 78.987 12.68 C 79.115 12.671 79.233 12.606 79.308 12.501 L 80.399 11.235 C 80.571 11.06 80.571 10.781 80.399 10.606 C 78.968 9.146 77.077 8.406 74.795 8.406 C 71.181 8.406 69.563 10.557 69.563 12.692 C 69.563 15.098 71.259 16.529 74.749 17.063 C 76.957 17.392 78.31 17.665 78.31 19.084 C 78.32 19.728 77.968 20.323 77.398 20.624 C 76.693 20.99 75.905 21.165 75.112 21.132 C 73.523 21.196 71.999 20.503 71.002 19.264 C 70.932 19.149 70.814 19.072 70.681 19.055 C 70.55 19.054 70.428 19.122 70.359 19.234 L 69.268 20.65 C 69.108 20.84 69.121 21.122 69.298 21.297 C 70.86 22.859 72.661 23.539 75.093 23.539 C 76.528 23.584 77.941 23.185 79.139 22.395 C 80.261 21.603 80.913 20.304 80.877 18.932 C 80.859 15.359 77.821 14.878 75.384 14.504 Z" fill="white"/>
+          <path d="M 112.42 2.93 C 112.342 2.829 112.216 2.775 112.088 2.788 L 110.081 2.788 C 109.853 2.767 109.641 2.909 109.573 3.129 L 103.748 19.117 L 97.926 3.132 C 97.859 2.911 97.645 2.768 97.415 2.789 L 95.173 2.789 C 94.945 2.768 94.733 2.91 94.665 3.129 L 88.869 19.117 L 83.049 3.132 C 82.981 2.911 82.767 2.768 82.537 2.789 L 80.505 2.789 C 80.377 2.776 80.251 2.83 80.172 2.931 C 80.095 3.049 80.084 3.198 80.142 3.327 L 87.357 22.909 C 87.426 23.126 87.635 23.267 87.861 23.249 L 89.835 23.249 C 90.063 23.271 90.275 23.129 90.342 22.909 L 96.321 6.712 L 102.258 22.902 C 102.326 23.123 102.539 23.268 102.77 23.249 L 104.716 23.249 C 104.945 23.269 105.157 23.128 105.225 22.909 L 112.444 3.315 C 112.497 3.191 112.489 3.048 112.421 2.93 Z M 117.53 8.531 C 113.494 8.531 110.33 11.895 110.33 16.172 C 110.33 20.377 113.532 23.668 117.62 23.668 C 119.863 23.676 122.008 22.748 123.538 21.108 C 123.708 20.935 123.708 20.657 123.538 20.484 L 122.357 19.217 C 122.279 19.123 122.163 19.069 122.04 19.068 C 121.912 19.08 121.796 19.147 121.722 19.251 C 120.713 20.446 119.217 21.119 117.653 21.082 C 115.251 21.082 113.428 19.304 113.196 16.748 L 123.897 16.748 C 124.087 16.768 124.267 16.655 124.331 16.474 C 124.352 16.416 124.359 16.354 124.353 16.292 C 124.382 13.953 123.624 11.88 122.223 10.459 C 120.983 9.21 119.29 8.515 117.53 8.531 Z M 121.513 14.749 L 113.319 14.749 C 113.828 12.507 115.471 11.091 117.53 11.091 C 119.588 11.091 121.162 12.589 121.513 14.749 Z M 133.82 8.775 C 133.365 8.626 132.89 8.545 132.412 8.535 C 130.992 8.535 129.766 9.394 129.008 10.908 L 129.008 9.413 C 129.017 9.29 128.972 9.169 128.885 9.082 C 128.799 8.995 128.678 8.95 128.556 8.958 L 126.668 8.958 C 126.48 8.945 126.305 9.057 126.238 9.233 C 126.217 9.291 126.209 9.352 126.213 9.413 L 126.213 22.801 C 126.204 22.924 126.249 23.045 126.337 23.133 C 126.424 23.22 126.545 23.265 126.668 23.257 L 128.556 23.257 C 128.678 23.264 128.799 23.219 128.885 23.131 C 128.972 23.044 129.017 22.923 129.008 22.801 L 129.008 15.436 C 129.008 12.753 130.181 11.151 132.147 11.151 C 132.46 11.146 132.771 11.204 133.061 11.32 C 133.183 11.386 133.328 11.396 133.458 11.345 C 133.51 11.317 133.555 11.278 133.589 11.23 C 133.625 11.182 133.649 11.127 133.66 11.069 L 134.1 9.361 C 134.173 9.123 134.052 8.868 133.82 8.775 Z M 147.543 9.537 C 147.669 9.443 147.723 9.28 147.678 9.129 C 147.603 8.997 147.455 8.923 147.304 8.943 L 144.801 8.943 C 144.603 8.947 144.415 9.028 144.277 9.17 L 138.038 15.295 L 138.038 2.064 C 138.047 1.94 138.002 1.819 137.914 1.732 C 137.827 1.644 137.706 1.599 137.582 1.608 L 135.714 1.608 C 135.591 1.599 135.47 1.645 135.382 1.732 C 135.295 1.82 135.25 1.94 135.258 2.064 L 135.258 22.801 C 135.249 22.925 135.295 23.046 135.382 23.133 C 135.47 23.22 135.591 23.265 135.714 23.257 L 137.582 23.257 C 137.706 23.265 137.827 23.22 137.914 23.133 C 138.002 23.045 138.047 22.924 138.038 22.801 L 138.038 16.243 L 144.124 23.025 C 144.258 23.178 144.453 23.26 144.655 23.249 L 147.188 23.249 C 147.341 23.261 147.486 23.184 147.562 23.051 C 147.585 22.983 147.588 22.91 147.571 22.841 C 147.554 22.771 147.517 22.708 147.465 22.659 L 141.06 15.612 L 147.517 9.532 Z M 154.526 14.656 L 154.429 14.656 C 152.164 14.305 151.279 13.737 151.279 12.638 C 151.279 11.188 152.953 10.971 153.947 10.971 C 155.422 10.921 156.842 11.539 157.811 12.653 C 157.914 12.826 158.138 12.885 158.313 12.785 C 158.369 12.753 158.416 12.708 158.45 12.653 L 159.54 11.386 C 159.711 11.212 159.711 10.933 159.54 10.758 C 158.132 9.32 156.178 8.558 153.936 8.558 C 150.326 8.558 148.705 10.709 148.705 12.843 C 148.705 15.249 150.401 16.681 153.895 17.215 C 156.103 17.544 157.455 17.817 157.455 19.236 C 157.467 19.881 157.112 20.477 156.54 20.776 C 155.837 21.142 155.049 21.317 154.257 21.284 C 152.668 21.347 151.144 20.654 150.148 19.416 C 150.077 19.301 149.959 19.225 149.826 19.207 C 149.7 19.218 149.586 19.283 149.512 19.385 L 148.391 20.757 C 148.233 20.948 148.247 21.229 148.425 21.403 C 149.987 22.965 151.788 23.645 154.22 23.645 C 155.655 23.691 157.07 23.292 158.27 22.502 C 159.391 21.71 160.043 20.41 160.007 19.038 C 160 15.511 156.985 15.029 154.526 14.656 Z M 11.09 5.449 L 1.618 0.147 C 1.292 -0.044 0.89 -0.049 0.558 0.132 C 0.227 0.313 0.015 0.655 0 1.033 L 0 11.121 C 0.003 11.491 0.206 11.83 0.531 12.007 L 3.864 13.874 L 5.007 14.514 L 5.116 14.454 L 10.264 11.574 C 10.538 11.413 10.876 11.408 11.155 11.561 C 11.433 11.714 11.61 12.003 11.62 12.321 L 11.62 6.334 C 11.616 5.965 11.413 5.626 11.09 5.449 Z" fill="rgb(0,147,104)"/>
+          <path d="M 9.901 17.465 L 4.906 14.667 L 2.222 16.161 C 1.949 16.31 1.778 16.596 1.778 16.908 L 1.778 25.348 C 1.788 25.666 1.965 25.955 2.243 26.108 C 2.522 26.262 2.86 26.257 3.134 26.096 L 11.07 21.65 C 11.345 21.502 11.518 21.215 11.519 20.903 L 11.519 16.58 C 11.503 16.957 11.291 17.298 10.96 17.479 C 10.629 17.66 10.227 17.655 9.901 17.465 Z" fill="rgb(186,213,57)"/>
+          <path d="M 10.146 11.68 L 4.997 14.56 L 4.889 14.62 L 9.884 17.419 C 10.211 17.609 10.612 17.614 10.943 17.433 C 11.275 17.252 11.487 16.91 11.502 16.533 L 11.502 12.423 C 11.491 12.106 11.313 11.819 11.035 11.666 C 10.757 11.514 10.419 11.519 10.146 11.68 Z" fill="rgb(1,96,63)"/>
+          <path d="M 23.335 0.147 L 13.864 5.448 C 13.539 5.625 13.336 5.965 13.333 6.335 L 13.333 12.29 C 13.344 11.974 13.52 11.686 13.797 11.533 C 14.075 11.38 14.412 11.384 14.685 11.543 L 19.835 14.423 L 19.947 14.483 L 21.09 13.845 L 24.419 11.976 C 24.743 11.8 24.947 11.461 24.949 11.091 L 24.949 1.032 C 24.935 0.655 24.724 0.314 24.393 0.132 C 24.062 -0.049 23.661 -0.044 23.335 0.147 Z" fill="rgb(0,147,104)"/>
+          <path d="M 13.333 16.577 L 13.333 20.908 C 13.333 21.219 13.504 21.506 13.778 21.654 L 21.717 26.101 C 21.991 26.261 22.329 26.264 22.606 26.111 C 22.883 25.958 23.059 25.67 23.07 25.354 L 23.07 16.909 C 23.07 16.598 22.899 16.312 22.626 16.163 L 19.947 14.667 L 14.948 17.465 C 14.621 17.656 14.219 17.661 13.888 17.479 C 13.557 17.297 13.346 16.954 13.333 16.576 Z" fill="rgb(186,213,57)"/>
+          <path d="M 14.685 11.677 C 14.412 11.518 14.075 11.515 13.798 11.668 C 13.521 11.821 13.345 12.108 13.333 12.424 L 13.333 16.534 C 13.347 16.911 13.558 17.254 13.889 17.435 C 14.22 17.617 14.622 17.611 14.948 17.42 L 19.947 14.621 L 19.835 14.562 Z" fill="rgb(1,96,63)"/>
+        </svg>
+      </div>
+      <div class="cover-title">My <em>Tech</em><br>Meets <em>Culture</em><br>Blueprint</div>
+      <div class="cover-sub">An honest story of code, growth &amp; community</div>
+      <div class="cover-chips">
+        <span class="chip chip-lime" onclick="go(1)">01 Know Yourself</span>
+        <span class="chip chip-white" onclick="go(2)">02 People Skills</span>
+        <span class="chip chip-lime" onclick="go(3)">03 OpsWerks Culture</span>
+        <span class="chip chip-white" onclick="go(4)">04 Growth Mindset</span>
+        <span class="chip chip-lime" onclick="go(5)">05 A Letter</span>
+      </div>
     </div>
-
-    <div class="cover-title">My <em>Tech</em><br>Meets<br><em>Culture</em><br>Blueprint</div>
-    <div class="cover-sub">An honest story of code, growth &amp; community</div>
-    <div class="cover-chips">
-      <span class="chip chip-lime">01 Know Yourself</span>
-      <span class="chip chip-white">02 People Skills</span>
-      <span class="chip chip-lime">03 OpsWerks Culture</span>
-      <span class="chip chip-white">04 Growth Mindset</span>
-      <span class="chip chip-lime">05 A Letter</span>
+    <div class="cover-scroll-hint">
+      <span class="scroll-hint-text">scroll or press → to begin</span>
+      <div class="scroll-hint-arrow"></div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════ CH1 ═══════════════════════════════ -->
-  <div class="slide ch-wrap" id="s1">
-    <div class="sidebar">
-      <div class="sb-num">01</div>
+  <!-- CH1 -->
+  <div class="page ch-page" id="p1">
+    <div class="ch-sidebar">
+      <div class="sb-bignum">01</div>
       <div class="sb-label">Chapter One</div>
       <div class="sb-title">Know<br>Yourself</div>
+      <div class="sb-tagline">The result that<br>caught me off guard</div>
     </div>
     <div class="ch-body">
       <div class="card">
-        <div class="card-title">ENFJ — the result that caught me off guard</div>
+        <div class="card-title">ENFJ — not what I expected</div>
         <p>I never thought of myself as an extrovert — but I also never fully felt like an introvert. So seeing ENFJ on the screen was genuinely surprising. It made me pause and think: is this actually me? The more I read, the more it clicked — not as a perfect definition, but as a useful mirror.</p>
       </div>
       <div class="pq">
@@ -485,16 +624,17 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════ CH2 ═══════════════════════════════ -->
-  <div class="slide ch-wrap" id="s2">
-    <div class="sidebar">
-      <div class="sb-num">02</div>
+  <!-- CH2 -->
+  <div class="page ch-page" id="p2">
+    <div class="ch-sidebar">
+      <div class="sb-bignum">02</div>
       <div class="sb-label">Chapter Two</div>
       <div class="sb-title">People<br>Skills</div>
+      <div class="sb-tagline">Learning to listen<br>before I solve</div>
     </div>
     <div class="ch-body">
       <div class="card">
-        <div class="card-title">Where I struggled</div>
+        <div class="card-title">Where I struggled most</div>
         <p>Whenever I was given a task or instructions, my brain would jump straight to solving — and I'd miss half of what was actually being said. I was actively listening and actively thinking at the same time, and thinking was winning. I had to learn to slow down and fully receive before I responded.</p>
       </div>
       <div class="pq">
@@ -506,8 +646,8 @@
           <p>"Yeah I'll work on it"<br>"Almost done"<br>"Should be fine"</p>
         </div>
         <div class="vs-divider">→</div>
-        <div class="vs-card" style="background:var(--ops-offwhite);">
-          <div class="vs-label" style="color:var(--ops-mid);">Clear</div>
+        <div class="vs-card" style="background:var(--offwhite);">
+          <div class="vs-label" style="color:var(--mid);">Clear</div>
           <p>"Done by 5pm"<br>"Blocked on X — need help"<br>"Here's what I decided and why"</p>
         </div>
       </div>
@@ -532,32 +672,33 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════ CH3 ═══════════════════════════════ -->
-  <div class="slide ch-wrap" id="s3">
-    <div class="sidebar">
-      <div class="sb-num">03</div>
+  <!-- CH3 -->
+  <div class="page ch-page" id="p3">
+    <div class="ch-sidebar">
+      <div class="sb-bignum">03</div>
       <div class="sb-label">Chapter Three</div>
       <div class="sb-title">Ops<br>Werks<br>Culture</div>
+      <div class="sb-tagline">The people that<br>made it real</div>
     </div>
     <div class="ch-body">
       <div class="dark-box">
-        <div class="dark-box-label">What I appreciate</div>
+        <div class="dark-box-label">What I appreciate so much</div>
         <p>The SSED team's generosity was consistent and genuine — always willing to share tools, ideas, knowledge, and their time without being asked. That kind of culture isn't written in a handbook. It's shown by people, every day.</p>
       </div>
       <div class="card">
         <div class="card-title">Core OpsWerks methods that stuck</div>
         <ul class="steps">
-          <li><span class="step-n" style="background:var(--ops-lime);color:var(--ops-dark);">1</span><span><strong>Make it meaningful.</strong> Not every day is a highlight — most of it is the middle. Finding meaning in ordinary moments made the work feel purposeful, not just productive.</span></li>
-          <li><span class="step-n" style="background:var(--ops-lime);color:var(--ops-dark);">2</span><span><strong>Grow and go.</strong> Every season has something to teach. What you absorb here propels you forward — carry the learning, not just the output.</span></li>
+          <li><span class="step-n" style="background:var(--lime);color:var(--dark);">1</span><span><strong>Make it meaningful.</strong> Not every day is a highlight — most of it is the middle. Finding meaning in ordinary moments made the work feel purposeful, not just productive.</span></li>
+          <li><span class="step-n" style="background:var(--lime);color:var(--dark);">2</span><span><strong>Grow and go.</strong> Every season has something to teach. What you absorb here propels you forward — carry the learning, not just the output.</span></li>
         </ul>
       </div>
       <div class="card">
         <div class="card-title">My seasons here</div>
         <div class="season-grid">
-          <div class="season-item"><div class="season-dot" style="background:var(--ops-lime-light);"></div><div class="season-title">Arrived</div><div class="season-text">Uncertain but open, watching how people moved and worked.</div></div>
-          <div class="season-item"><div class="season-dot" style="background:var(--ops-bright);"></div><div class="season-title">Learned</div><div class="season-text">Started understanding the culture — not just the tools but the people behind them.</div></div>
-          <div class="season-item"><div class="season-dot" style="background:var(--ops-lime);"></div><div class="season-title">Applied</div><div class="season-text">Put those learnings into practice — in my code, my communication, and how I showed up.</div></div>
-          <div class="season-item"><div class="season-dot" style="background:var(--ops-mid);"></div><div class="season-title">Propelled</div><div class="season-text">Ready to carry this season's wisdom into whatever comes next.</div></div>
+          <div class="season-item"><div class="season-dot" style="background:var(--lime-light);"></div><div class="season-title">Arrived</div><div class="season-text">Uncertain but open, watching how people moved and worked.</div></div>
+          <div class="season-item"><div class="season-dot" style="background:var(--bright);"></div><div class="season-title">Learned</div><div class="season-text">Started understanding the culture — not just the tools but the people behind them.</div></div>
+          <div class="season-item"><div class="season-dot" style="background:var(--lime);"></div><div class="season-title">Applied</div><div class="season-text">Put those learnings into practice — in my code, my communication, and how I showed up.</div></div>
+          <div class="season-item"><div class="season-dot" style="background:var(--mid);"></div><div class="season-title">Propelled</div><div class="season-text">Ready to carry this season's wisdom into whatever comes next.</div></div>
         </div>
       </div>
       <div class="day1">
@@ -567,12 +708,13 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════ CH4 ═══════════════════════════════ -->
-  <div class="slide ch-wrap" id="s4">
-    <div class="sidebar">
-      <div class="sb-num">04</div>
+  <!-- CH4 -->
+  <div class="page ch-page" id="p4">
+    <div class="ch-sidebar">
+      <div class="sb-bignum">04</div>
       <div class="sb-label">Chapter Four</div>
       <div class="sb-title">Growth<br>Mind<br>set</div>
+      <div class="sb-tagline">Turning the gap<br>into fuel</div>
     </div>
     <div class="ch-body">
       <div class="card">
@@ -586,18 +728,18 @@
         <div class="vs-card" style="background:#fff8f8;">
           <div class="vs-label" style="color:#a32d2d;">Accepting it</div>
           <ul class="steps">
-            <li><span style="color:#e24b4a;font-size:15px;line-height:1;margin-top:2px;">✕</span> I don't belong here</li>
-            <li><span style="color:#e24b4a;font-size:15px;line-height:1;margin-top:2px;">✕</span> Everyone's better than me</li>
-            <li><span style="color:#e24b4a;font-size:15px;line-height:1;margin-top:2px;">✕</span> I'm not good enough at X or Y</li>
+            <li><span style="color:#e24b4a;font-size:16px;line-height:1;margin-top:1px;">✕</span> I don't belong here</li>
+            <li><span style="color:#e24b4a;font-size:16px;line-height:1;margin-top:1px;">✕</span> Everyone's better than me</li>
+            <li><span style="color:#e24b4a;font-size:16px;line-height:1;margin-top:1px;">✕</span> I'm not good enough at X or Y</li>
           </ul>
         </div>
         <div class="vs-divider">→</div>
-        <div class="vs-card" style="background:var(--ops-offwhite);">
-          <div class="vs-label" style="color:var(--ops-mid);">Doing something about it</div>
+        <div class="vs-card" style="background:var(--offwhite);">
+          <div class="vs-label" style="color:var(--mid);">Doing something about it</div>
           <ul class="steps">
-            <li><span style="color:var(--ops-bright);font-size:15px;line-height:1;margin-top:2px;">✓</span> I'm exactly where I should be</li>
-            <li><span style="color:var(--ops-bright);font-size:15px;line-height:1;margin-top:2px;">✓</span> They're who I'm here to learn from</li>
-            <li><span style="color:var(--ops-bright);font-size:15px;line-height:1;margin-top:2px;">✓</span> I'm weak at X and Y — so I'll learn X and Y</li>
+            <li><span style="color:var(--bright);font-size:16px;line-height:1;margin-top:1px;">✓</span> I'm exactly where I should be</li>
+            <li><span style="color:var(--bright);font-size:16px;line-height:1;margin-top:1px;">✓</span> They're who I'm here to learn from</li>
+            <li><span style="color:var(--bright);font-size:16px;line-height:1;margin-top:1px;">✓</span> I'm weak at X and Y — so I'll learn X and Y</li>
           </ul>
         </div>
       </div>
@@ -612,12 +754,13 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════ CH5 LETTER ═══════════════════════════════ -->
-  <div class="slide ch-wrap" id="s5">
-    <div class="sidebar">
-      <div class="sb-num">05</div>
+  <!-- CH5 LETTER -->
+  <div class="page ch-page" id="p5">
+    <div class="ch-sidebar">
+      <div class="sb-bignum">05</div>
       <div class="sb-label">Chapter Five</div>
       <div class="sb-title">A<br>Letter</div>
+      <div class="sb-tagline">To the version<br>of me that started</div>
     </div>
     <div class="letter-body">
       <div class="letter-to">To future me —</div>
@@ -628,61 +771,103 @@
       <div class="letter-sign">
         <div class="letter-sign-name">With honesty,</div>
         <div class="letter-sign-name" style="margin-top:2px;">You — after OpsWerks.</div>
-        <div class="letter-sign-role" style="margin-top:8px;">Software Engineering Intern · 2026</div>
+        <div class="letter-sign-role" style="margin-top:10px;">Software Engineering Intern · 2026</div>
       </div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════ NAV ═══════════════════════════════ -->
-  <div id="nav">
-    <button class="nav-btn" id="prev-btn" onclick="go(current-1)" disabled>← Prev</button>
-    <div style="display:flex;align-items:center;gap:14px;">
-      <div id="dots"></div>
-      <span id="slide-label">Cover</span>
-    </div>
-    <button class="nav-btn" id="next-btn" onclick="go(current+1)">Next →</button>
+</div><!-- /pages -->
+
+<!-- Bottom Nav -->
+<div id="bottom-nav">
+  <button class="nav-btn" id="prev-btn" onclick="go(current-1)" disabled>
+    <span>←</span> Prev
+  </button>
+  <div id="dots"></div>
+  <button class="nav-btn" id="next-btn" onclick="go(current+1)">
+    Next <span>→</span>
+  </button>
+</div>
+
+<!-- Menu Overlay -->
+<div id="menu-overlay" onclick="closeMenuOnBg(event)">
+  <div class="menu-inner">
+    <div class="menu-title">Jump to a chapter</div>
+    <button class="menu-item current" id="mi0" onclick="go(0);toggleMenu()"><span class="menu-num">0</span> Cover</button>
+    <button class="menu-item" id="mi1" onclick="go(1);toggleMenu()"><span class="menu-num">1</span> Know Yourself</button>
+    <button class="menu-item" id="mi2" onclick="go(2);toggleMenu()"><span class="menu-num">2</span> People Skills</button>
+    <button class="menu-item" id="mi3" onclick="go(3);toggleMenu()"><span class="menu-num">3</span> OpsWerks Culture</button>
+    <button class="menu-item" id="mi4" onclick="go(4);toggleMenu()"><span class="menu-num">4</span> Growth Mindset</button>
+    <button class="menu-item" id="mi5" onclick="go(5);toggleMenu()"><span class="menu-num">5</span> A Letter</button>
+    <button class="menu-close" onclick="toggleMenu()">Close</button>
   </div>
 </div>
 
 <script>
-  const TOTAL = 6;
-  const LABELS = ['Cover', 'Ch 01 — Know Yourself', 'Ch 02 — People Skills', 'Ch 03 — OpsWerks Culture', 'Ch 04 — Growth Mindset', 'Ch 05 — A Letter'];
-  let current = 0;
+const TOTAL = 6;
+const LABELS = ['', 'Ch 01 — Know Yourself', 'Ch 02 — People Skills', 'Ch 03 — OpsWerks Culture', 'Ch 04 — Growth Mindset', 'Ch 05 — A Letter'];
+let current = 0;
+let isAnimating = false;
 
-  const dotsEl = document.getElementById('dots');
-  for (let i = 0; i < TOTAL; i++) {
-    const d = document.createElement('button');
-    d.className = 'dot' + (i === 0 ? ' active' : '');
-    d.setAttribute('aria-label', 'Go to slide ' + (i + 1));
-    d.onclick = () => go(i);
-    dotsEl.appendChild(d);
-  }
+// Build dots
+const dotsEl = document.getElementById('dots');
+for (let i = 0; i < TOTAL; i++) {
+  const d = document.createElement('button');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.setAttribute('aria-label', 'Go to page ' + i);
+  d.onclick = () => go(i);
+  dotsEl.appendChild(d);
+}
 
-  function go(idx) {
-    if (idx < 0 || idx >= TOTAL) return;
-    document.getElementById('s' + current).classList.remove('active');
-    current = idx;
-    document.getElementById('s' + current).classList.add('active');
-    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
-    document.getElementById('prev-btn').disabled = current === 0;
-    document.getElementById('next-btn').disabled = current === TOTAL - 1;
-    document.getElementById('slide-label').textContent = LABELS[current];
-    document.getElementById('progress-bar').style.width = ((current / (TOTAL - 1)) * 100) + '%';
-    document.getElementById('s' + current).scrollTop = 0;
-  }
+function go(idx) {
+  if (idx < 0 || idx >= TOTAL || idx === current || isAnimating) return;
+  isAnimating = true;
+  const prev = document.getElementById('p' + current);
+  prev.classList.remove('active');
+  prev.classList.add('exit-up');
+  setTimeout(() => { prev.classList.remove('exit-up'); }, 450);
+  current = idx;
+  const next = document.getElementById('p' + current);
+  next.classList.add('active');
+  // scroll body to top on chapter pages
+  const body = next.querySelector('.ch-body') || next.querySelector('.letter-body');
+  if (body) body.scrollTop = 0;
+  updateUI();
+  setTimeout(() => { isAnimating = false; }, 500);
+}
 
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(current + 1);
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(current - 1);
-  });
+function updateUI() {
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === TOTAL - 1;
+  document.getElementById('nav-chapter').textContent = LABELS[current] || '';
+  document.getElementById('progress').style.width = (current / (TOTAL - 1) * 100) + '%';
+  document.querySelectorAll('.menu-item').forEach((m, i) => m.classList.toggle('current', i === current));
+}
 
-  let touchStartX = 0;
-  document.getElementById('app').addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
-  document.getElementById('app').addEventListener('touchend', e => {
-    const diff = touchStartX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) go(diff > 0 ? current + 1 : current - 1);
-  });
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(current + 1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(current - 1);
+  if (e.key === 'Escape') { const m = document.getElementById('menu-overlay'); if (m.classList.contains('open')) toggleMenu(); }
+});
+
+// Touch / swipe
+let tx = 0, ty = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive:true});
+document.addEventListener('touchend', e => {
+  const dx = tx - e.changedTouches[0].clientX;
+  const dy = ty - e.changedTouches[0].clientY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) go(dx > 0 ? current + 1 : current - 1);
+});
+
+// Menu
+function toggleMenu() {
+  document.getElementById('menu-overlay').classList.toggle('open');
+}
+function closeMenuOnBg(e) {
+  if (e.target === document.getElementById('menu-overlay')) toggleMenu();
+}
 </script>
 </body>
 </html>
-
